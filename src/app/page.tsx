@@ -1,101 +1,111 @@
+'use client';
+
+import { useState, FormEvent } from "react";
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+interface Task {
+  id: number;
+  text: string;
+  completed: boolean;
+}
+
+export default function Home() {
+  const [task, setTask] = useState<string>("");
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (task) {
+      setTasks([...tasks, { id: Date.now(), text: task, completed: false }]);
+      setTask("");
+    }
+  };
+
+  const toggleTaskCompletion = (id: number) => {
+    setTasks(tasks.map(t => 
+      t.id === id ? { ...t, completed: !t.completed } : t
+    ));
+  };
+
+  const deleteTask = (id: number) => {
+    setTasks(tasks.filter(t => t.id !== id));
+  };
+
+  const completedTasksCount = tasks.filter(t => t.completed).length;
+
+  return (
+    <main className="w-screen h-screen bg-gradient-to-b from-black via-gray-700 to-gray-900 flex justify-top gap-5 flex-col pt-10 ">
+      <section className="flex justify-center items-center gap-4 flex-col mt-10">
+        <Image 
+          src="/assets/Logo.png"
+          width={126} height={48}
+          alt="Logo"
+        />
+        
+        <form onSubmit={handleSubmit} className="flex w-full flex-row justify-center my-4">
+          <input 
+            type="text" 
+            value={task}
+            onChange={(e) => setTask(e.target.value)}
+            placeholder="Digite uma tarefa"
+            className="bg-gray-800 px-4 py-2 rounded-lg border-2 border-gray-800 hover:border-cyan-600 focus:border-cyan-600 w-[50%]" 
+          /> 
+          <button 
+            type="submit" 
+            className="bg-cyan-600 px-4 py-2 rounded-lg ml-4 flex flex-row items-center gap-2 justify-around">
+            <b>Criar</b><span>✙</span>
+          </button>
+        </form>
+
+        <article className="w-[55%] flex md:flex-row flex-col justify-between gap-10 mt-4">
+          <span className="text-cyan-600 font-semibold flex justify-center items-center gap-2">
+            Tarefas Criadas 
+            <b className="text-white font-semibold rounded-full bg-cyan-600 w-9 h-9 items-center justify-center p-2 flex">{tasks.length}</b>
+          </span>
+          <span className="text-purple-300 font-semibold flex justify-center items-center gap-2">
+            Concluídas 
+            <b className="text-white font-semibold rounded-full bg-gray-600 w-[5rem] h-9 items-center justify-center p-2 flex flex-row">{completedTasksCount} de {tasks.length}</b> 
+          </span>
+        </article>
+
+        <ul className="flex justify-center items-center gap-2 flex-col w-full">
+          {/* #caso não existam tarefas: */}
+          {tasks.length === 0 ? (
+            <li className="border-t-2 border-gray-700 p-4 rounded-lg flex justify-center items-center gap-2 flex-col w-[55%]">
+              <Image src="/assets/Clipboard.png" width={56} height={56} alt="Clipboard" />
+              <span className="text-gray-500">
+                <b>Você ainda não tem tarefas cadastradas</b> 
+                <br /> 
+                Crie tarefas e organize seus itens a fazer
+              </span>
+            </li>
+          ) : (
+            tasks.map((t) => (
+              <li key={t.id} className="border border-2 border-gray-600 bg-gray-800 p-4 flex justify-between items-center rounded-lg gap-4 w-[55%]">
+                <input 
+                  type="checkbox" 
+                  checked={t.completed} 
+                  onChange={() => toggleTaskCompletion(t.id)} 
+                  className="w-5 h-5 rounded-full border-2 border-cyan-600 checked:bg-green-500 appearance-none checked:border-green-500 cursor-pointer transform transition-transform duration-200 checked:scale-110" 
+                />
+                <label 
+                  className={`text-gray-300 flex items-stretch w-full justify-start ${t.completed ? 'line-through' : ''}`}
+                >
+                  {t.text}
+                </label> 
+                <Image 
+                  src="/assets/trash.png" 
+                  width={24} height={24} 
+                  alt="Lixeira" 
+                  className="hover:bg-red-500 cursor-pointer" 
+                  onClick={() => deleteTask(t.id)} 
+                />
+              </li>
+            ))
+          )}
+        </ul>
+      </section>
+    </main>
   );
 }
